@@ -7,13 +7,12 @@ import cv2
 import torch
 import numpy as np
 
-# model = YOLO("./runs/detect/train/weights/last.pt")  
-model = attempt_load_weights("./runs/detect/train/weights/last.pt")
+model = attempt_load_weights("yolov8s.pt")
 
 INPUT_W=640
 INPUT_H=640
 
-names = ["person","cat","dog","horse"]
+names = ["person","cat","dog","horse","horse","car"]
 
 # 前处理和YOLOv5相同
 def preprocess_image(image_path):
@@ -87,58 +86,53 @@ def postprocess(preds, img, orig_img):
     return preds
 
 
-
-files = os.listdir("./test_img")
-
-for file in files:
-    print(file)
-    img_path = os.path.join("./test_img",file)
-
-    image,image_raw,h,w = preprocess_image(img_path)
-    input_ = torch.tensor(image)
+img_path = "bus.jpg"
+image,image_raw,h,w = preprocess_image(img_path)
+input_ = torch.tensor(image)
 
 
-    preds = model(input_)
-    # print(len(preds))
-    # print(preds[0].shape)
+preds = model(input_)
+# print(len(preds))
+# print(preds[0].shape)
 
-    preds = postprocess(preds, image, image_raw)
+preds = postprocess(preds, image, image_raw)
 
-    for i, det in enumerate(preds):  # detections per image
+for i, det in enumerate(preds):  # detections per image
 
-        gn = torch.tensor(image_raw.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-        if det is not None and len(det):
-            # Rescale boxes from img_size to im0 size
-            det[:, :4] = ops.scale_boxes(image.shape[2:], det[:, :4], image_raw.shape).round()
+    gn = torch.tensor(image_raw.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+    if det is not None and len(det):
+        # Rescale boxes from img_size to im0 size
+        det[:, :4] = ops.scale_boxes(image.shape[2:], det[:, :4], image_raw.shape).round()
 
-            for *xyxy, conf, cls_ in det:   # x1,y1,x2,y2
+        for *xyxy, conf, cls_ in det:   # x1,y1,x2,y2
 
 
-                # det_count += 1\
-                label_text = names[int(cls_)]
-                # print(conf.cpu().detach().numpy())
-                prob = round(conf.cpu().detach().numpy().item(),2)
+            # det_count += 1\
+            print(f"cls_ = {cls_}")
+            label_text = names[int(cls_)]
+            # print(conf.cpu().detach().numpy())
+            prob = round(conf.cpu().detach().numpy().item(),2)
 
 
 
-                # tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
-                tl = round(0.02 * (image.shape[0] + image.shape[1]) / 2) + 1  # line/font thickness
+            # tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
+            tl = round(0.02 * (image.shape[0] + image.shape[1]) / 2) + 1  # line/font thickness
 
-                color = (255, 255, 0)
-                c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3]))
+            color = (255, 255, 0)
+            c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3]))
 
-                cv2.rectangle(image_raw, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
+            cv2.rectangle(image_raw, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
 
-                tf = max(tl - 1, 1)  # font thickness
-                t_size = cv2.getTextSize(label_text+":"+str(prob), 0, fontScale=tl / 2, thickness=tf)[0]
-                c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
-                cv2.rectangle(image_raw, c1, c2, color, -1, cv2.LINE_AA)  # filled
-                cv2.putText(image_raw, label_text+":"+str(prob), (c1[0], c1[1] - 2), 0, tl / 2, [0, 0, 255], 
-                    thickness=tf, lineType=cv2.LINE_AA)
+            tf = max(tl - 1, 1)  # font thickness
+            t_size = cv2.getTextSize(label_text+":"+str(prob), 0, fontScale=tl / 2, thickness=tf)[0]
+            c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
+            cv2.rectangle(image_raw, c1, c2, color, -1, cv2.LINE_AA)  # filled
+            cv2.putText(image_raw, label_text+":"+str(prob), (c1[0], c1[1] - 2), 0, tl / 2, [0, 0, 255], 
+                thickness=tf, lineType=cv2.LINE_AA)
 
-                if not os.path.exists("./detect_res"):
-                    os.makedirs("./detect_res")
-                cv2.imwrite("./detect_res/"+file,image_raw)
+        if not os.path.exists("./detect_res"):
+            os.makedirs("./detect_res")
+        cv2.imwrite("./detect_res/result.jpg",image_raw)
 
 
 
