@@ -7,7 +7,7 @@ import cv2
 import torch
 import numpy as np
 
-model = attempt_load_weights("yolov8s.pt")
+model = attempt_load_weights("./weights/yolov8s.pt")
 
 INPUT_W=640
 INPUT_H=640
