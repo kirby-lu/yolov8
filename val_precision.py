@@ -8,7 +8,7 @@ from ultralytics.yolo.utils import ops
 
 # --- 配置参数 ---
 MODEL_PATH = "yolov8s.pt"
-DATA_ROOT = "datasets/coco128"
+DATA_ROOT = "dataset/coco128"
 IMG_SIZE = 640
 CONF_THRES = 0.001  # 计算mAP通常需要极小的阈值以获取完整曲线
 IOU_THRES = 0.6     # NMS 的 IoU 阈值
