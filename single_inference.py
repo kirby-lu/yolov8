@@ -86,7 +86,7 @@ def postprocess(preds, img, orig_img):
     return preds
 
 
-img_path = "bus.jpg"
+img_path = "./data/bus.jpg"
 image,image_raw,h,w = preprocess_image(img_path)
 input_ = torch.tensor(image)
 

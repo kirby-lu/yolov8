@@ -1,5 +1,4 @@
 __pycache__
-*.jpg
 yolov8s.pt
 datasets
 .DS_Store
